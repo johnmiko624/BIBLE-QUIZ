@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Quiz</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #4b9f5e, #2e5b36);
+            color: white;
+            text-align: center;
+            overflow: hidden;
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #fff;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+        button:hover {
+            background: #ccc;
+        }
+        #quiz, #results {
+            display: none;
+        }
+        .question {
+            margin: 20px 0;
+        }
+        .timer {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="landing-page">
+        <h1>Welcome to the Bible Quiz!</h1>
+        <p>Created by John Miko Sarsalijo</p>
+        <button onclick="startQuiz()">Start Quiz</button>
+        <button onclick="viewInstructions()">Instructions</button>
+        <button onclick="viewHighScores()">High Scores</button>
+        <p>Share this quiz with friends!</p>
+        <button onclick="shareQuiz()">Share Link</button>
+        <p>Follow us on social media for more quizzes!</p> <!-- New feature on landing page -->
+    </div>
+
+    <div id="quiz">
+        <div class="timer" id="timer">Time left: 15:00</div>
+        <div class="question" id="question-container"></div>
+        <button id="next-button" onclick="nextQuestion()">Next</button>
+    </div>
+
+    <div id="results">
+        <h2>Your Results</h2>
+        <p id="score"></p>
+        <p id="bible-verse"></p>
+        <button onclick="restartQuiz()">Restart Quiz</button>
+        <button onclick="viewLeaderboard()">View Leaderboard</button>
+        <button onclick="goHome()">Home</button> <!-- Home button -->
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { question: "What is the first book of the Bible?", answers: ["Genesis", "Exodus", "Leviticus", "Numbers"], correct: 0 },
+        { question: "Who was swallowed by a big fish?", answers: ["Jonah", "Moses", "David", "Peter"], correct: 0 },
+        { question: "What did Jesus turn water into?", answers: ["Wine", "Juice", "Blood", "Vinegar"], correct: 0 },
+        { question: "Who betrayed Jesus for thirty pieces of silver?", answers: ["Peter", "Judas", "John", "Thomas"], correct: 1 },
+        { question: "What is the last book of the Bible?", answers: ["Revelation", "Hebrews", "Jude", "Acts"], correct: 0 },
+        { question: "Who was the first woman?", answers: ["Eve", "Sarah", "Mary", "Ruth"], correct: 0 },
+        { question: "What is the shortest verse in the Bible?", answers: ["Jesus wept.", "Pray without ceasing.", "God is love.", "Rejoice always."], correct: 0 },
+        { question: "How many days did it rain during Noah's flood?", answers: ["40", "30", "50", "20"], correct: 0 },
+        { question: "Who is known as the father of faith?", answers: ["Abraham", "Moses", "Noah", "David"], correct: 0 },
+        { question: "What is the greatest commandment?", answers: ["Love your neighbor", "Love God", "Do not steal", "Do not lie"], correct: 1 },
+        { question: "Which disciple doubted Jesus' resurrection?", answers: ["Peter", "John", "Thomas", "Matthew"], correct: 2 },
+        { question: "What is the fruit of the Spirit?", answers: ["Love", "Joy", "Peace", "All of the above"], correct: 3 },
+        { question: "Who led the Israelites into the Promised Land?", answers: ["Moses", "Joshua", "David", "Solomon"], correct: 1 },
+        { question: "What city did Jesus grow up in?", answers: ["Nazareth", "Bethlehem", "Jerusalem", "Capernaum"], correct: 0 },
+        { question: "How many plagues were there in Egypt?", answers: ["10", "12", "8", "15"], correct: 0 },
+        { question: "Who wrote the Book of Psalms?", answers: ["David", "Moses", "Solomon", "Isaiah"], correct: 0 },
+        { question: "What miracle did Jesus perform at the wedding in Cana?", answers: ["Turned water into wine", "Walked on water", "Healed the blind", "Fed 5000"], correct: 0 },
+        { question: "Who was known as the weeping prophet?", answers: ["Jeremiah", "Isaiah", "Ezekiel", "Daniel"], correct: 0 },
+        { question: "What was the name of David's son?", answers: ["Solomon", "Saul", "Goliath", "Samuel"], correct: 0 },
+        { question: "What is the main theme of the Bible?", answers: ["Love", "Redemption", "Faith", "All of the above"], correct: 3 },
+        { question: "Who said, 'For God so loved the world'?", answers: ["Jesus", "Paul", "John", "Peter"], correct: 2 },
+        { question: "What did Jesus say on the cross?", answers: ["It is finished", "I thirst", "Father, forgive them", "All of the above"], correct: 3 },
+        { question: "Who is the prince of peace?", answers: ["Jesus", "Isaiah", "David", "Paul"], correct: 0 },
+        { question: "What does the word 'gospel' mean?", answers: ["Good news", "Salvation", "Prophecy", "Revelation"], correct: 0 },
+        { question: "Who was the first person to see the risen Christ?", answers: ["Mary Magdalene", "Peter", "John", "Thomas"], correct: 0 },
+        { question: "What is the 'Lord's Prayer'?", answers: ["Our Father", "Hail Mary", "Glory Be", "Apostles' Creed"], correct: 0 },
+        { question: "How did God create the world?", answers: ["Spoke it into existence", "Used his hands", "Thought it", "Drew it"], correct: 0 },
+        { question: "What book is known as the 'Song of Solomon'?", answers: ["Proverbs", "Psalms", "Ecclesiastes", "Song of Solomon"], correct: 3 },
+        { question: "Who is the author of Psalms?", answers: ["David", "Moses", "Solomon", "Job"], correct: 0 },
+        { question: "Which Old Testament character interpreted dreams?", answers: ["Joseph", "Daniel", "Moses", "Saul"], correct: 1 },
+        { question: "Who was the first murderer?", answers: ["Cain", "Abel", "Noah", "Moses"], correct: 0 },
+        { question: "What is the 'fruit of the Spirit' mentioned in Galatians?", answers: ["Wisdom", "Knowledge", "Love", "All of the above"], correct: 2 },
+        { question: "What is the main message of the Sermon on the Mount?", answers: ["Love your enemies", "Blessed are the meek", "Seek first the Kingdom of God", "All of the above"], correct: 3 },
+        { question: "What was the first miracle performed by Jesus?", answers: ["Turning water into wine", "Healing the sick", "Feeding the 5000", "Walking on water"], correct: 0 },
+        { question: "What was the name of Abraham's wife?", answers: ["Sarah", "Hagar", "Rebekah", "Leah"], correct: 0 },
+        { question: "Who was thrown into a lion's den?", answers: ["Daniel", "Shadrach", "Meshach", "Abednego"], correct: 0 },
+        { question: "What is the significance of baptism?", answers: ["Public declaration", "Cleansing of sin", "Both A and B", "None of the above"], correct: 2 },
+        { question: "Which king saw a handwriting on the wall?", answers: ["Belshazzar", "Nebuchadnezzar", "Darius", "Cyrus"], correct: 0 },
+        { question: "What did Jesus say was the greatest commandment?", answers: ["Love God", "Love your neighbor", "Do not steal", "Do not lie"], correct: 0 },
+        { question: "Who was the first king of Israel?", answers: ["Saul", "David", "Solomon", "Samuel"], correct: 0 },
+        { question: "What is the significance of Pentecost?", answers: ["Holy Spirit came", "Jesus was born", "Jesus died", "Last supper"], correct: 0 },
+        { question: "Who is the angel that announced Jesus' birth?", answers: ["Gabriel", "Michael", "Raphael", "Uriel"], correct: 0 },
+        { question: "What did Jesus often teach in?", answers: ["Parables", "Poems", "Songs", "Proverbs"], correct: 0 },
+        { question: "Who was the tax collector that climbed a tree to see Jesus?", answers: ["Zacchaeus", "Matthew", "Peter", "Judas"], correct: 0 },
+        { question: "What did Jesus do at the Last Supper?", answers: ["Broke bread", "Washed feet", "Gave wine", "All of the above"], correct: 3 },
+        { question: "What book comes after the Gospels?", answers: ["Acts", "Revelation", "Hebrews", "Romans"], correct: 0 },
+        { question: "Which king built the temple in Jerusalem?", answers: ["David", "Solomon", "Saul", "Hezekiah"], correct: 1 },
+        { question: "What did Moses part to lead the Israelites out of Egypt?", answers: ["Red Sea", "Jordan River", "Nile River", "Dead Sea"], correct: 0 },
+        { question: "What animal spoke to Balaam?", answers: ["Donkey", "Horse", "Camel", "Lion"], correct: 0 },
+        { question: "Who was known for his wisdom?", answers: ["Solomon", "Moses", "David", "Job"], correct: 0 },
+        { question: "What are the Beatitudes?", answers: ["Blessings", "Curses", "Prayers", "Psalms"], correct: 0 },
+        { question: "What is the main theme of the Book of Revelation?", answers: ["Prophecy", "Love", "Forgiveness", "Law"], correct: 0 }
+    ];
+
+    let score = 0;
+    let currentQuestionIndex = 0;
+    let timeLeft = 900; // 15 minutes in seconds
+    let timer;
+
+    function startQuiz() {
+        document.getElementById("landing-page").style.display = "none";
+        document.getElementById("quiz").style.display = "block";
+        score = 0;
+        currentQuestionIndex = 0;
+        shuffleQuestions();
+        showQuestion();
+        startTimer();
+    }
+
+    function shuffleQuestions() {
+        for (let i = questions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [questions[i], questions[j]] = [questions[j], questions[i]];
+        }
+    }
+
+    function showQuestion() {
+        const questionContainer = document.getElementById("question-container");
+        const currentQuestion = questions[currentQuestionIndex];
+        questionContainer.innerHTML = `<h3>${currentQuestion.question}</h3>`;
+        currentQuestion.answers.forEach((answer, index) => {
+            questionContainer.innerHTML += `<button onclick="selectAnswer(${index})">${answer}</button>`;
+        });
+    }
+
+    function selectAnswer(selectedIndex) {
+        const currentQuestion = questions[currentQuestionIndex];
+        if (selectedIndex === currentQuestion.correct) {
+            score++;
+        }
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            showQuestion();
+        } else {
+            endQuiz();
+        }
+    }
+
+    function startTimer() {
+        timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById("timer").innerText = `Time left: ${Math.floor(timeLeft / 60)}:${('0' + timeLeft % 60).slice(-2)}`;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                endQuiz();
+            }
+        }, 1000);
+    }
+
+    function endQuiz() {
+        clearInterval(timer);
+        document.getElementById("quiz").style.display = "none";
+        document.getElementById("results").style.display = "block";
+        document.getElementById("score").innerText = `Your score: ${score} out of ${questions.length}`;
+
+        let bibleVerse = "";
+        if (score === questions.length) {
+            bibleVerse = "Congratulations! You scored a perfect score! \"For I know the plans I have for you, declares the Lord...\" - Jeremiah 29:11";
+        } else {
+            bibleVerse = `Keep trying! Here's a verse for you: \"I can do all things through Christ who strengthens me.\" - Philippians 4:13`;
+        }
+        document.getElementById("bible-verse").innerText = bibleVerse;
+
+        // Additional feature: Show tips for improvement
+        const improvementTips = document.createElement("p");
+        improvementTips.innerText = "Tips for Improvement: Read your Bible regularly and study the verses related to your score.";
+        document.getElementById("results").appendChild(improvementTips);
+    }
+
+    function restartQuiz() {
+        timeLeft = 900;
+        document.getElementById("results").style.display = "none";
+        startQuiz();
+    }
+
+    function goHome() {
+        document.getElementById("results").style.display = "none";
+        document.getElementById("landing-page").style.display = "block";
+    }
+
+    function viewInstructions() {
+        alert("Answer the questions as best as you can! You have 15 minutes to complete the quiz. Good luck!");
+    }
+
+    function viewHighScores() {
+        alert("High scores feature coming soon!");
+    }
+
+    function shareQuiz() {
+        const quizLink = "http://example.com"; // Replace with actual link
+        alert(`Share this quiz link: ${quizLink}`);
+    }
+
+    function viewLeaderboard() {
+        alert("Leaderboard feature coming soon!");
+    }
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
